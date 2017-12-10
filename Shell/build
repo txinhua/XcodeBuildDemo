@@ -1,8 +1,10 @@
 #! /bin/bash
 # created by TYrone on 2017-12-10
 #工程绝对路径 
-cd ~/Desktop/PackageTest/Shell/  
+basepath=$(cd `dirname $0`; pwd)
+cd $basepath
 pwd
+local=NO
 
 project_path=$(pwd)/../TabbarCustomerConfig
 #工程名称
@@ -58,3 +60,18 @@ else
     echo "*** 创建.ipa文件失败 ***"
 fi
 echo '*** 打包完成 ***'
+
+if [[ $local != "YES" ]];then
+
+ipaPath=${exportFilePath}/${scheme_name}.ipa
+pgyerUKey="0f27a306f42e06abde39e6cb59e71ecb" # 这里替换蒲公英ukey
+pgyerApiKey="b5c4607b9886773dbc51fbf2450419ff" # 这里替换蒲公英apiKey
+
+RESULT=$(curl -F "file=@$ipaPath" -F "uKey=$pgyerUKey" -F "_api_key=$pgyerApiKey" -F "publishRange=2" http://www.pgyer.com/apiv1/app/upload)
+
+echo "完成上传"
+echo $RESULT
+echo 蒲公英网址 https://www.pgyer.com
+else
+echo "仅保存至本地，不上传蒲公英"
+fi
