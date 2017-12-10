@@ -1,0 +1,60 @@
+#! /bin/bash
+# created by TYrone on 2017-12-10
+#工程绝对路径 
+cd ~/Desktop/PackageTest/Shell/  
+pwd
+
+project_path=$(pwd)/../TabbarCustomerConfig
+#工程名称
+project_name=TabbarCustomerConfig
+
+#打包模式 Debug/Release
+development_mode=Release
+
+#scheme名
+scheme_name=TabbarCustomerConfig
+
+#archive文件夹名称
+archive_path=$(pwd)/archive/$(date +%G%m%d%H%M%S)
+rm -rf ${archive_path}
+mkdir ${archive_path}
+
+archive_target_path=${archive_path}/archive
+rm -rf ${archive_target_path}
+mkdir ${archive_target_path}
+
+#plist文件所在路径
+exportOptionsPlistPath=$(pwd)/config/ExportOptions.plist
+
+#导出.ipa文件所在路径
+exportFilePath=${archive_path}/ipa
+rm -rf ${exportFilePath}
+mkdir ${exportFilePath}
+
+echo '*** 正在 编译工程 For '${development_mode}
+xcodebuild \
+archive \
+-workspace ${project_path}/${project_name}.xcworkspace \
+-scheme ${scheme_name} \
+-configuration ${development_mode} \
+-archivePath ${archive_target_path}/${project_name}.xcarchive \
+clean archive \
+-quiet || exit
+echo '*** 编译完成 ***'
+
+echo '*** 正在 打包 ***'
+xcodebuild \
+-exportArchive \
+-archivePath ${archive_target_path}/${project_name}.xcarchive \
+-exportPath ${exportFilePath} \
+-exportOptionsPlist ${exportOptionsPlistPath} \
+-allowProvisioningUpdates \
+-quiet || exit
+
+if [ -e $exportFilePath/$scheme_name.ipa ]; then
+    echo "*** .ipa文件已导出 ***"
+    open $exportFilePath
+else
+    echo "*** 创建.ipa文件失败 ***"
+fi
+echo '*** 打包完成 ***'
